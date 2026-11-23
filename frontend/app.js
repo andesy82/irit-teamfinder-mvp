@@ -1,10 +1,11 @@
-const API_URL = "http://localhost:8000";
+const API_URL = "";
 
 const defaultUsers = [
-    { id: 1, name: "Август (ИРИТ-РТФ)", role: "Frontend", skills: "JavaScript, HTML5, CSS3, Fetch API", tg_username: "august_dev" },
-    { id: 2, name: "Морковка (ИРИТ-РТФ)", role: "Bot Dev", skills: "Python, aiogram, Telegram API, JSON", tg_username: "morkovka_bot" },
-    { id: 3, name: "Даня (ИРИТ-РТФ)", role: "Algorithms", skills: "C#, .NET, Python, Data Structures", tg_username: "danya_algo" },
-    { id: 4, name: "Даша (ИРИТ-РТФ)", role: "Product/Design", skills: "User Flow, Excalidraw, QA, Pitching", tg_username: "dasha_pm" }
+    { id: 1, name: "Тимур (ИРИТ-РТФ)", role: "Backend", skills: "Python, FastAPI, SQLite, Docker, C#", tg_username: "timurCRL" },
+    { id: 2, name: "Август (ИРИТ-РТФ)", role: "Frontend", skills: "JavaScript, HTML5, CSS3, Fetch API", tg_username: "augustpumpkin" },
+    { id: 3, name: "Морковка (ИРИТ-РТФ)", role: "Bot Dev", skills: "Python, aiogram, Telegram API, JSON", tg_username: "ilovehersky" },
+    { id: 4, name: "Даня (ИРИТ-РТФ)", role: "Algorithms", skills: "C#, .NET, Python, Data Structures", tg_username: "danyaknkv" },
+    { id: 5, name: "Даша (ИРИТ-РТФ)", role: "Product/Design", skills: "User Flow, Excalidraw, QA, Pitching", tg_username: "skweetie" }
 ];
 
 let users = [];
@@ -18,7 +19,8 @@ async function loadUsers() {
     try {
         const response = await fetch(`${API_URL}/users`);
         if (!response.ok) throw new Error("API offline");
-        users = await response.json();
+        const data = await response.json();
+        users = data.length > 0 ? data : defaultUsers;
         apiStatus.textContent = "● Подключено к FastAPI";
     } catch (error) {
         const saved = localStorage.getItem("irit_users");
@@ -34,6 +36,7 @@ function renderUsers() {
 
     usersGrid.innerHTML = filtered.map(user => {
         const skillTags = user.skills.split(",").map(s => `<span class="skill-tag">${s.trim()}</span>`).join("");
+        const cleanTg = user.tg_username.replace("@", "").trim();
         return `
             <div class="user-card">
                 <div>
@@ -42,11 +45,11 @@ function renderUsers() {
                     <div class="skills-wrap">${skillTags}</div>
                 </div>
                 <div>
-                    <button class="btn btn-primary" onclick="openMatchModal('${user.name}', '${user.role}', '${user.tg_username}')">
+                    <button class="btn btn-primary" onclick="openMatchModal('${user.name}', '${user.role}', '${cleanTg}')">
                         Подобрать (Match)
                     </button>
-                    <a href="https://t.me{user.tg_username}" target="_blank" class="btn btn-outline">
-                        @${user.tg_username}
+                    <a href="https://t.me{cleanTg}" target="_blank" class="btn btn-outline">
+                        @${cleanTg}
                     </a>
                 </div>
             </div>
@@ -61,7 +64,7 @@ userForm.addEventListener("submit", async (e) => {
         name: document.getElementById("name").value,
         role: document.getElementById("role").value,
         skills: document.getElementById("skills").value,
-        tg_username: document.getElementById("tg_username").value.replace("@", "")
+        tg_username: document.getElementById("tg_username").value.replace("@", "").trim()
     };
 
     try {
